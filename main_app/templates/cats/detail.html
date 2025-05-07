@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+  <section class="page-header">
+    <h1>{{ cat.name }}</h1>
+    <img src="{% static 'images/cool-cat.svg' %}" alt="A cool cat" />
+  </section>
+
+  <div class="cat-details">
+    {% if cat.age > 0 %}
+      <h2>A {{ cat.age }} year old {{ cat.breed }}</h2>
+    {% else %}
+      <h2>A {{ cat.breed }} kitten.</h2>
+    {% endif %}
+    <p>{{ cat.description }}</p>
+
+    <div class="cat-actions">
+      <a href="{% url 'cat-update' cat.id %}" class="btn warn">✏️ Edit</a>
+      <form action="{% url 'cat-delete' cat.id %}" method="POST" style="display:inline;">
+        {% csrf_token %}
+        <button type="submit" class="btn danger">🗑️ Delete</button>
+      </form>
+    </div>
+  </div>
+
+  <hr />
+
+  <h3>{{ cat.name }}'s Toys</h3>
+{% if cat.toys.all %}
+  <ul>
+    {% for toy in cat.toys.all %}
+      <li>
+        {{ toy.name }} ({{ toy.color }})
+        <form action="{% url 'remove-toy' cat.id toy.id %}" method="POST" style="display:inline;">
+          {% csrf_token %}
+          <button type="submit" class="btn danger btn-xs">Remove</button>
+        </form>
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>No toys assigned.</p>
+{% endif %}
+
+
+  <hr />
+
+  <h3>Feeding Log</h3>
+  {% if feedings %}
+    <ul>
+      {% for feeding in feedings %}
+        <li>{{ feeding.date }} - {{ feeding.get_meal_display }}</li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>This cat hasn't been fed yet.</p>
+  {% endif %}
+
+  <hr />
+<h3>Add Feeding</h3>
+<form method="POST">
+  {% csrf_token %}
+  {{ feeding_form.as_p }}
+  <button type="submit" class="btn submit">Log Feeding</button>
+</form>
+
+  <br />
+  <a href="{% url 'cat-index' %}">← Back to All Cats</a>
+{% endblock %}
+
